@@ -1,5 +1,7 @@
 package me.aelesia.commons.utils;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -12,10 +14,51 @@ public class ThreadUtils {
 	 * 
 	 * @param millis  Number of milliseconds to sleep
 	 */
+	@Deprecated
 	public static void sleep(int millis) {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {
+			throw new RuntimeException("Method is not supposed to be used for interruptable sleep", e);
+		}
+	}
+	
+	public static void sleepFor(long ms) {
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			throw new RuntimeException("Method is not supposed to be used for interruptable sleep", e);
+		}
+	}
+	
+	public static void sleepFor(long time, ChronoUnit unit) {
+		long ms;
+		switch (unit) {
+			case MILLIS: ms = time; 
+				break;
+			case SECONDS: ms = time*1000; 
+				break;
+			case MINUTES: ms = time*1000*60;
+				break;
+			case HOURS: ms = time*1000*60*60;
+				break;
+			default: throw new IllegalArgumentException("Chronounit " + unit.name().toString() + " not supported.");
+		}
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			throw new RuntimeException("Method is not supposed to be used for interruptable sleep", e);
+		}
+	}
+	
+	public static void sleepUntil(LocalDateTime sleepTime) {
+		try {
+			long millis = LocalDateTime.now().until(sleepTime, ChronoUnit.MILLIS);
+			if (millis>0) {
+				Thread.sleep(millis);
+			}
+		} catch (InterruptedException e) {
+			throw new RuntimeException("Method is not supposed to be used for interruptable sleep", e);
 		}
 	}
 	

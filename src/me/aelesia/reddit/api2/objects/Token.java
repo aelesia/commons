@@ -1,8 +1,7 @@
-package me.aelesia.reddit.api.objects;
+package me.aelesia.reddit.api2.objects;
 
 import java.time.LocalDateTime;
 
-@Deprecated
 public class Token {
 	public String accessToken;
 	public String tokenType;

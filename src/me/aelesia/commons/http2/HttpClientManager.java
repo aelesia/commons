@@ -1,27 +1,26 @@
-package me.aelesia.commons.http;
+package me.aelesia.commons.http2;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 
-@Deprecated
 public class HttpClientManager {
 	
-	ExecutorService executorService = Executors.newFixedThreadPool(60);
+	ScheduledExecutorService executor;
 	HttpClientPool client;
 	
-	public HttpClientManager() {
-//		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-//		cm.setDefaultMaxPerRoute(100);
-//		client = HttpClients.createMinimal(cm);
-		client = new HttpClientPool(60);
+	public HttpClientManager(int numThreads) {
+		this.executor = Executors.newScheduledThreadPool(numThreads);
+		this.client = new HttpClientPool(numThreads);
 	}
 	
 	/**
@@ -30,7 +29,7 @@ public class HttpClientManager {
 	 * @param  request  The HttpRequest object
 	 * @return  The http response of the request
 	 */
-	public HttpResponse executeWait(HttpUriRequest request) throws IOException {
+	public HttpResponse execute(HttpUriRequest request) throws IOException {
 		return client.execute(request);
 	}
 	
@@ -46,7 +45,7 @@ public class HttpClientManager {
 			} catch (IOException e) {
 			} 
         };
-        executorService.submit(runnable);
+        executor.submit(runnable);
         
 	}
 	
@@ -88,21 +87,38 @@ public class HttpClientManager {
 	 * @param  listener  A listener that will execute after the request has been performed
 	 */
 	public void execute(HttpUriRequest request, HttpResponseListener listener) {
+		this.execute(request, 0, listener);
+	}
+	
+	public void execute(HttpUriRequest request, LocalDateTime scheduledTime, HttpResponseListener listener) {
+		if (scheduledTime==null || LocalDateTime.now().isAfter(scheduledTime)) {
+			this.execute(request, 0, listener);
+		} else {
+			this.execute(request, LocalDateTime.now().until(scheduledTime, ChronoUnit.MILLIS), listener);
+		}
+	}
+		
+	public void execute(HttpUriRequest request, long delayMs, HttpResponseListener listener) {
 		Runnable runnable = () -> {
         		try {
+        			listener.executeBefore();
 				HttpResponse response = client.execute(request);
 				listener.executeAfter(response);
 			} catch (IOException e) {
 				listener.executeOnException(e);
 			}
         };
-        executorService.submit(runnable);
+        if (delayMs==0) {
+            executor.submit(runnable);
+        } else {
+        		executor.schedule(runnable, delayMs, TimeUnit.MILLISECONDS);
+        }
 	}
 	
-	public Future<HttpResponse> execute(HttpUriRequest request) {
+	public Future<HttpResponse> executeFuture(HttpUriRequest request) {
 		Callable<HttpResponse> callable = () -> {
 			return client.execute(request);
 		};
-		return executorService.submit(callable);
+		return executor.submit(callable);
 	}
 }

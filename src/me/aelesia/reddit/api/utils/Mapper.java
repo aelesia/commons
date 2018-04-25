@@ -11,6 +11,7 @@ import com.google.gson.JsonParser;
 import me.aelesia.reddit.api.objects.RedditPost;
 import me.aelesia.reddit.api.objects.Token;
 
+@Deprecated
 public class Mapper {
 	
 	private static JsonParser jsonParser = new JsonParser();

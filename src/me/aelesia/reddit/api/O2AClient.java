@@ -27,6 +27,7 @@ import me.aelesia.reddit.api.consts.URL;
 import me.aelesia.reddit.api.objects.Token;
 import me.aelesia.reddit.api.utils.Mapper;
 
+@Deprecated
 public class O2AClient {	
 	private HttpClient httpClient;
 	private Token token;

@@ -1,10 +1,11 @@
-package me.aelesia.commons.http;
+package me.aelesia.commons.http2;
 
 import org.apache.http.HttpResponse;
 
-@Deprecated
 public abstract class HttpResponseListener {
 	public abstract void executeAfter(HttpResponse response);
 	
 	public abstract void executeOnException(Exception e);
+	
+	public void executeBefore() {};
 }

@@ -10,7 +10,7 @@ public class Logger {
 	public static int WARN = 3;
 	public static int ERROR = 2;
 	
-	public static int logLevel = INFO;
+	public static int logLevel = TRACE;
 	
 	public static void trace(Object log) {
 		if (logLevel >= TRACE) {
@@ -28,6 +28,11 @@ public class Logger {
 		if (logLevel >= INFO) {
 			System.out.println("["+LocalDateTime.now()+"] " + log);
 		}
+	}
+	
+	public static void error(Object log, Exception e) {
+		Logger.error(log);
+		e.printStackTrace();
 	}
 	
 	public static void error(Object log) {

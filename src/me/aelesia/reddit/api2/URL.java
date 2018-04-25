@@ -1,6 +1,5 @@
-package me.aelesia.reddit.api.consts;
+package me.aelesia.reddit.api2;
 
-@Deprecated
 public class URL {
 	public static String ME = "https://oauth.reddit.com/api/v1/me";
 	public static String ACCESS_TOKEN = "https://www.reddit.com/api/v1/access_token";

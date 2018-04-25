@@ -1,10 +1,9 @@
-package me.aelesia.reddit.api.objects;
+package me.aelesia.reddit.api2.objects;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-@Deprecated
 public class RedditPost {
 	public String kind;
 	public String partialId;

@@ -13,6 +13,7 @@ import org.apache.http.impl.client.HttpClients;
 
 import me.aelesia.commons.utils.ThreadUtils;
 
+@Deprecated
 public class HttpClientPool {
 	
 	private static int SLEEP_TIME_MS = 10;

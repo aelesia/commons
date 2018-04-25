@@ -11,6 +11,7 @@ import me.aelesia.reddit.api.consts.URL;
 import me.aelesia.reddit.api.objects.RedditPost;
 import me.aelesia.reddit.api.utils.Mapper;
 
+@Deprecated
 public class RedditAPI {
 	private O2AClient o2aClient;
 	
