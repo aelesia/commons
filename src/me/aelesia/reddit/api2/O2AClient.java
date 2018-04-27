@@ -29,6 +29,7 @@ public class O2AClient {
 	Object calculateNextRequestTimeLock = new Object();
 	
 	private final static int THROTTLE_NUM = 60;
+	private final static int THROTTLE_NUM = 600;
 	
 	private Logger logger;
 	private HttpClientManager httpClient;
@@ -91,6 +92,7 @@ public class O2AClient {
 			while (true) {
 				try {
 					obtainToken();
+					break;
 				} catch (IOException e) {
 					logger.warn("Unable to obtain token. Retry attempt: " + ++i + ". Retrying after " + Math.pow(Math.min(i, 10), 3) + " seconds");
 					ThreadUtils.sleepFor((int)(Math.pow(Math.min(i, 10), 3)*1000));
