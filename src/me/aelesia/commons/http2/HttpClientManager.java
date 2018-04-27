@@ -90,15 +90,15 @@ public class HttpClientManager {
 		this.execute(request, 0, listener);
 	}
 	
-	public void execute(HttpUriRequest request, LocalDateTime scheduledTime, HttpResponseListener listener) {
+	public Future<?> execute(HttpUriRequest request, LocalDateTime scheduledTime, HttpResponseListener listener) {
 		if (scheduledTime==null || LocalDateTime.now().isAfter(scheduledTime)) {
-			this.execute(request, 0, listener);
+			return this.execute(request, 0, listener);
 		} else {
-			this.execute(request, LocalDateTime.now().until(scheduledTime, ChronoUnit.MILLIS), listener);
+			return this.execute(request, LocalDateTime.now().until(scheduledTime, ChronoUnit.MILLIS), listener);
 		}
 	}
 		
-	public void execute(HttpUriRequest request, long delayMs, HttpResponseListener listener) {
+	public Future<?> execute(HttpUriRequest request, long delayMs, HttpResponseListener listener) {
 		Runnable runnable = () -> {
         		try {
         			listener.executeBefore();
@@ -108,17 +108,27 @@ public class HttpClientManager {
 				listener.executeOnException(e);
 			}
         };
-        if (delayMs==0) {
-            executor.submit(runnable);
-        } else {
-        		executor.schedule(runnable, delayMs, TimeUnit.MILLISECONDS);
+        if (delayMs!=0) {
+    			return executor.schedule(runnable, delayMs, TimeUnit.MILLISECONDS);
         }
+        return executor.submit(runnable);
 	}
 	
-	public Future<HttpResponse> executeFuture(HttpUriRequest request) {
+	public Future<HttpResponse> executeFuture(HttpUriRequest request, LocalDateTime scheduledTime) {
+		if (scheduledTime==null || LocalDateTime.now().isAfter(scheduledTime)) {
+			return this.executeFuture(request, 0);
+		} else {
+			return this.executeFuture(request, LocalDateTime.now().until(scheduledTime, ChronoUnit.MILLIS));
+		}
+	}
+	
+	public Future<HttpResponse> executeFuture(HttpUriRequest request, long delayMs) {
 		Callable<HttpResponse> callable = () -> {
 			return client.execute(request);
 		};
-		return executor.submit(callable);
+        if (delayMs!=0) {
+    			return executor.schedule(callable, delayMs, TimeUnit.MILLISECONDS);
+        }
+        return executor.submit(callable);
 	}
 }

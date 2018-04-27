@@ -48,7 +48,7 @@ class Mapper {
 		RedditPost post = new RedditPost();
 		post.kind = "t1";
 		post.partialId = data.get("id").getAsString();
-		post.subreddit = data.get("subreddit").getAsString();
+		post.subreddit = data.get("subreddit").getAsString().toLowerCase();
 		post.subredditId = data.get("subreddit_id").getAsString();
 		post.parentId = data.get("parent_id").getAsString();
 		post.threadId = data.get("link_id").getAsString();
@@ -72,7 +72,7 @@ class Mapper {
 		RedditPost post = new RedditPost();
 		post.kind = "t3";
 		post.partialId = data.get("id").getAsString();
-		post.subreddit = data.get("subreddit").getAsString();
+		post.subreddit = data.get("subreddit").getAsString().toLowerCase();
 		post.subredditId = data.get("subreddit_id").getAsString();
 		post.author = data.get("author").getAsString();
 		post.threadTitle = data.get("title").getAsString();

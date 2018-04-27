@@ -3,10 +3,15 @@ package me.aelesia.reddit.api2;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import me.aelesia.commons.logger.Logger;
+
+import me.aelesia.commons.http2.HttpClientManager;
+import me.aelesia.commons.http2.HttpResponseListener;
+import me.aelesia.commons.logger2.Logger;
 import me.aelesia.commons.utils.HttpUtils;
 import me.aelesia.reddit.api2.Mapper;
 import me.aelesia.reddit.api2.O2AClient;
@@ -14,13 +19,17 @@ import me.aelesia.reddit.api2.URL;
 import me.aelesia.reddit.api2.objects.RedditPost;
 
 public class RedditAPI {
+	private Logger logger;
 	private O2AClient o2aClient;
+	private String username;
 	
 	private int commentLimit = 10;
 	private int threadLimit = 5;
 	
-	public RedditAPI(O2AClient o2aClient) {
-		this.o2aClient = o2aClient;
+	public RedditAPI(HttpClientManager httpClient, String username, String password, String appId, String secretKey, String userAgent) {
+		this.username = username;
+		this.o2aClient = new O2AClient(httpClient, username, password, appId, secretKey, userAgent);
+		this.logger = new Logger("["+this.username+"]");
 	}
 	
 	/**
@@ -73,10 +82,10 @@ public class RedditAPI {
 			HttpUriRequest request = HttpUtils.generateGet(URL.COMMENTS(subreddit), ("limit:"+commentLimit));
 			String commentsJson = o2aClient.execute(request);
 			commentsList = Mapper.mapPosts(commentsJson);
-			Logger.debug("Retrived " + commentsList.size() + " comments from /r/" + subreddit);
+			logger.debug("Retrived " + commentsList.size() + " comments from /r/" + subreddit);
 		} catch (IOException e) {
 			commentsList = new ArrayList<RedditPost>();
-			Logger.warn("Failed to load any comments from: " + URL.COMMENTS(subreddit));
+			logger.warn("Failed to load any comments from: " + URL.COMMENTS(subreddit));
 		} 
 		return commentsList;
 	}
@@ -94,10 +103,10 @@ public class RedditAPI {
 			HttpUriRequest request = HttpUtils.generateGet(URL.COMMENTS(subreddit), ("limit:"+threadLimit));
 			String threadsJson = o2aClient.execute(request);
 			threadList = Mapper.mapPosts(threadsJson);
-			Logger.debug("Retrieved " + threadList.size() + " threads from /r/" + subreddit);
+			logger.debug("Retrieved " + threadList.size() + " threads from /r/" + subreddit);
 		} catch (IOException e) {
 			threadList = new ArrayList<RedditPost>();
-			Logger.warn("Failed to retrieve any threads from: " + URL.POSTS(subreddit));
+			logger.warn("Failed to retrieve any threads from: " + URL.POSTS(subreddit));
 		} 
 		return threadList;
 	}
@@ -120,10 +129,10 @@ public class RedditAPI {
 			HttpUriRequest request = HttpUtils.generateGet(URL.USER(username), "limit:100", ("after:"+after));
 			String json = o2aClient.execute(request);
 			postList = Mapper.mapPosts(json);
-			Logger.debug("Retrieved " + postList.size() + " posts from /u/" + username);
+			logger.debug("Retrieved " + postList.size() + " posts from /u/" + username);
 		} catch (IOException e) {
 			postList = new ArrayList<RedditPost>();
-			Logger.warn("Failed to retrieve any posts from: " + URL.USER(username));
+			logger.warn("Failed to retrieve any posts from: " + URL.USER(username));
 		} 
 		return postList;
 	}
@@ -138,12 +147,31 @@ public class RedditAPI {
 	public void reply(String id, String text) throws IOException {
 		HttpUriRequest request = HttpUtils.generatePost(URL.REPLY, ("thing_id:"+id), ("text:"+text));
 		o2aClient.executeO2A(request);
-		Logger.info("Replied to #"+id);
+		logger.info("Replied to #"+id);
 	}
 	
 	public void delete(String id) throws IOException {
 		HttpUriRequest request = HttpUtils.generatePost(URL.DELETE, ("id:"+id));
-		System.out.println(o2aClient.executeO2A(request));
-		Logger.info("Deleted #"+id);
+		o2aClient.executeO2A(request);
+		logger.info("Deleted #"+id);
+	}
+	
+	public Future<?> delete(String id, HttpResponseListener listener) {
+		HttpUriRequest request = HttpUtils.generatePost(URL.DELETE, ("id:"+id));
+		return o2aClient.executeO2A(request, new HttpResponseListener() {
+			@Override
+			public void executeOnException(Exception e) {
+				listener.executeOnException(e);
+			}
+			@Override
+			public void executeAfter(HttpResponse response) {
+				logger.info("Deleted #"+id);
+				listener.executeAfter(response);
+			}
+		});
+	}
+	
+	public O2AClient getO2AClient() {
+		return this.o2aClient;
 	}
 }

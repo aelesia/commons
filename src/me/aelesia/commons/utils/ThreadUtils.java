@@ -91,4 +91,14 @@ public class ThreadUtils {
 		}
 		return objectList;
 	}
+	
+	public static List<Object> cancelAllFutures(List<Future<?>> futureList) {
+		List<Object> objectList = new ArrayList<Object>();
+		for (Future<?> f : futureList) {
+			if (!f.isDone()) {
+				f.cancel(false);
+			}
+		}
+		return objectList;
+	}
 }
