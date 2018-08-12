@@ -29,7 +29,6 @@ public class O2AClient {
 	Object calculateNextRequestTimeLock = new Object();
 	
 	private final static int THROTTLE_NUM = 60;
-	private final static int THROTTLE_NUM = 600;
 	
 	private Logger logger;
 	private HttpClientManager httpClient;

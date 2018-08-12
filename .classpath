@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="lib/httpcore-4.4.7.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.7.jar"/>
 	<classpathentry kind="lib" path="lib/commons-configuration2-2.2.jar"/>
+	<classpathentry kind="lib" path="lib/jnativehook-2.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
